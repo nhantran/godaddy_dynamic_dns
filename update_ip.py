@@ -30,6 +30,25 @@ logging.basicConfig(filename=godaddy.logfile, format='%(asctime)s %(message)s', 
 public_ip = pif.get_public_ip()
 logging.info("My ip: {0}".format(public_ip))
 
+# Create previous.ip to cache my public ip
+import os.path
+if not os.path.isfile('previous.ip'):
+	previp = open('previous.ip', 'a').close()
+
+# Compare current public ip with the cached one
+# Replace the old one in cache if they are different and let program continue to work with GoDaddy. 
+# Otherwise exit the program
+previp = open('previous.ip', 'r')
+prev_ip = previp.read()	
+if prev_ip == public_ip:
+	logging.info('No need to update since the cached public ip is not changed')
+	sys.exit()
+else:
+	logging.info('Replacing previous public ip[' + str(prev_ip) + '] by public ip[' + str(public_ip) + '] in previous.ip')
+	previp = open('previous.ip', 'w')
+	previp.write(public_ip)
+	previp.close()
+
 # login to GoDaddy DNS management
 # docs at https://pygodaddy.readthedocs.org/en/latest/
 client = GoDaddyClient()
